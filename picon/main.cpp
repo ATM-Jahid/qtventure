@@ -8,8 +8,6 @@
 #include <QPixmap>
 #include <QSettings>
 #include <QVBoxLayout>
-#include <QListWidget>
-#include <QListWidgetItem>
 
 QString findDesktopFile(const QString &appName) {
     QString desktopPath = "/usr/share/applications/";
