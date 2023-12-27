@@ -3,6 +3,7 @@
 #include <QApplication>
 #include <QIcon>
 #include <QLabel>
+#include <QPixmap>
 #include <QVBoxLayout>
 #include <QListWidget>
 #include <QListWidgetItem>
@@ -12,30 +13,36 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 
     Widget w;
-    QVBoxLayout *layout = new QVBoxLayout(&w);
-    QListWidget *listWidget = new QListWidget(&w);
+    QVBoxLayout *mainLayout = new QVBoxLayout(&w);
+    //QListWidget *listWidget = new QListWidget(&w);
 
-    QList<QString> list = {"firefox-developer-edition", "QtProject-qtcreator", "foot",
-                           "freetube", "krita", "gimp", "nnn", "sxiv", "org.pwmt.zathura"};
+    QList<QList<QString>> bigList = {{"firefox-developer-edition", "QtProject-qtcreator", "foot"},
+                            {"freetube", "krita", "gimp"}, {"nnn", "sxiv", "org.pwmt.zathura"}};
 
-    for (const QString &currString : list) {
-        qDebug() << currString;
+    for (const QList<QString> &list : bigList) {
+        QVBoxLayout *wsLayout = new QVBoxLayout;
 
-        //QIcon appIcon(iconPath);
-        QIcon appIcon = QIcon::fromTheme(currString);
+        for (const QString &currString : list) {
+            qDebug() << currString;
 
-        //QLabel iconLabel;
-        //iconLabel.setPixmap(appIcon.pixmap(64, 64));
+            QLabel *iconLabel = new QLabel;
 
-        //QLabel appName(currString);
+            //QIcon appIcon(iconPath);
+            QIcon appIcon = QIcon::fromTheme(currString);
+            QPixmap iconPix = appIcon.pixmap(32, 32);
 
-        QListWidgetItem *item = new QListWidgetItem(appIcon, currString);
+            iconLabel->setPixmap(iconPix);
+            iconLabel->setToolTip(currString);
 
-        listWidget->addItem(item);
+            wsLayout->addWidget(iconLabel);
+            wsLayout->setAlignment(Qt::AlignTop);
+        }
+        mainLayout->addLayout(wsLayout);
     }
 
-    layout->addWidget(listWidget);
+    //layout->addWidget(listWidget);
 
+    w.setLayout(mainLayout);
     w.show();
     return a.exec();
 }
