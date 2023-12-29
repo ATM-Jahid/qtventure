@@ -1,5 +1,7 @@
 #include "widget.h"
 
+#include <LayerShellQt/Shell>
+#include <LayerShellQt/Window>
 #include <QApplication>
 #include <QByteArray>
 #include <QDebug>
@@ -13,6 +15,7 @@
 #include <QPixmap>
 #include <QProcess>
 #include <QSettings>
+#include <QSize>
 #include <QString>
 #include <QStyle>
 #include <QVBoxLayout>
@@ -111,9 +114,12 @@ QList<QMap<QString, Tile>> readJson() {
 
 int main(int argc, char *argv[])
 {
+    QSize barSize = QSize(40, 600);
+
     QApplication a(argc, argv);
 
     Widget w;
+
     QVBoxLayout *mainLayout = new QVBoxLayout(&w);
 
     QList<QMap<QString, Tile>> wspaces = readJson();
@@ -146,7 +152,7 @@ int main(int argc, char *argv[])
             }
 
             QIcon cachedIcon = iconCache.value(tmp.t_class);
-            QPixmap iconPix = cachedIcon.pixmap(18, 18);
+            QPixmap iconPix = cachedIcon.pixmap(16, 16);
 
             iconLabel->setPixmap(iconPix);
             iconLabel->setToolTip(tmp.t_title);
@@ -159,8 +165,24 @@ int main(int argc, char *argv[])
     }
 
     w.setStyleSheet("QWidget { background-color: black; }");
-    w.resize(24, 720);
+    w.resize(barSize);
     w.setLayout(mainLayout);
+    w.show();
+    w.hide();
+    qDebug() << w.size();
+
+    QWindow *lwin = w.windowHandle();
+    qDebug() << lwin;
+
+    if (LayerShellQt::Window *lsh = LayerShellQt::Window::get(lwin)) {
+        qDebug() << lsh;
+        lsh->setScope("atombar");
+        lsh->setLayer(LayerShellQt::Window::LayerTop);
+        lsh->setExclusiveZone(barSize.width());
+        lsh->setAnchors(LayerShellQt::Window::AnchorRight);
+        lsh->setKeyboardInteractivity(LayerShellQt::Window::KeyboardInteractivityNone);
+    }
+
     w.show();
 
     return a.exec();
