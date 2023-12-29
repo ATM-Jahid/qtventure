@@ -113,11 +113,10 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    QList<QMap<QString, Tile>> wspaces = readJson();
-
     Widget w;
     QVBoxLayout *mainLayout = new QVBoxLayout(&w);
 
+    QList<QMap<QString, Tile>> wspaces = readJson();
     QHash<QString, QIcon> iconCache;
 
     for (const QMap<QString, Tile> &list : wspaces) {
@@ -147,7 +146,7 @@ int main(int argc, char *argv[])
             }
 
             QIcon cachedIcon = iconCache.value(tmp.t_class);
-            QPixmap iconPix = cachedIcon.pixmap(24, 24);
+            QPixmap iconPix = cachedIcon.pixmap(18, 18);
 
             iconLabel->setPixmap(iconPix);
             iconLabel->setToolTip(tmp.t_title);
@@ -159,7 +158,10 @@ int main(int argc, char *argv[])
         mainLayout->addLayout(wsLayout);
     }
 
+    w.setStyleSheet("QWidget { background-color: black; }");
+    w.resize(24, 720);
     w.setLayout(mainLayout);
     w.show();
+
     return a.exec();
 }
