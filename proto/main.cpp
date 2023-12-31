@@ -14,6 +14,7 @@
 #include <QLabel>
 #include <QPixmap>
 #include <QProcess>
+#include <QPushButton>
 #include <QSettings>
 #include <QSize>
 #include <QString>
@@ -114,26 +115,36 @@ QList<QMap<QString, Tile>> readJson() {
 
 int main(int argc, char *argv[])
 {
-    QSize barSize = QSize(40, 600);
+    QSize barSize = QSize(30, 600);
 
     QApplication a(argc, argv);
 
     Widget w;
 
+    // hacky way to get QWindow
+    w.show();
+    w.hide();
+    w.setFixedWidth(barSize.width());
+
     QVBoxLayout *mainLayout = new QVBoxLayout(&w);
+    // necessary because of hiding
+    mainLayout->setContentsMargins(6, 8, 6, 8);
 
     QList<QMap<QString, Tile>> wspaces = readJson();
     QHash<QString, QIcon> iconCache;
 
     for (const QMap<QString, Tile> &list : wspaces) {
+        QMapIterator<QString, Tile> it(list);
+
         QVBoxLayout *wsLayout = new QVBoxLayout;
 
-        QMapIterator<QString, Tile> it(list);
+        // considers empty workspaces
         if (!it.hasNext()) {
             QLabel *emptyLabel = new QLabel;
             wsLayout->addWidget(emptyLabel);
         }
 
+        // gets clients in a workspace
         while (it.hasNext()) {
             it.next();
             Tile tmp = it.value();
@@ -152,7 +163,7 @@ int main(int argc, char *argv[])
             }
 
             QIcon cachedIcon = iconCache.value(tmp.t_class);
-            QPixmap iconPix = cachedIcon.pixmap(16, 16);
+            QPixmap iconPix = cachedIcon.pixmap(18, 18);
 
             iconLabel->setPixmap(iconPix);
             iconLabel->setToolTip(tmp.t_title);
@@ -164,11 +175,19 @@ int main(int argc, char *argv[])
         mainLayout->addLayout(wsLayout);
     }
 
-    w.setStyleSheet("QWidget { background-color: black; }");
-    w.resize(barSize);
+    // pushButton to check if the panel gets mouse events
+    QPushButton *button = new QPushButton("?", &w);
+    button->setMinimumSize(0, 0);
+    button->setToolTip("it doesn't even show up");
+    mainLayout->addWidget(button);
+    QObject::connect(button, &QPushButton::clicked, [&]() {
+        qDebug() << "Button clicked!";
+    });
+    button->setStyleSheet("QPushButton:hover { background-color: lightblue; }");
+
     w.setLayout(mainLayout);
-    w.show();
-    w.hide();
+    w.setStyleSheet("QWidget { background-color: \"#565656\"; }");
+    w.resize(barSize);
     qDebug() << w.size();
 
     QWindow *lwin = w.windowHandle();
